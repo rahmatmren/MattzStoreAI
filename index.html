@@ -312,11 +312,11 @@
                     <span data-i18n="nav_support_btn">Support</span>
                 </button>
                 
-                <div class="relative group border-l border-white/20 pl-4">
+                <div class="relative group border-l border-white/20 pl-4 z-[60]">
                     <button class="flex items-center gap-1 text-lambo-blue font-orbitron font-bold text-sm transition-colors cursor-pointer py-2" id="desktop-lang-toggle">
                         ENG <i class="ph-bold ph-caret-down"></i>
                     </button>
-                    <div class="absolute right-0 top-full mt-1 w-24 bg-lambo-gray border border-gray-700 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden">
+                    <div class="absolute right-0 top-full mt-2 w-28 bg-[#111111] border border-gray-600 rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-[70]">
                         <button onclick="setLang('en')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
                         <button onclick="setLang('zh')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
                         <button onclick="setLang('es')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
@@ -329,10 +329,9 @@
             <div class="md:hidden flex-1 flex justify-end">
                 <button id="mobile-menu-btn" class="text-2xl text-lambo-blue"><i class="ph ph-list"></i></button>
             </div>
-            
         </div>
         
-        <div id="mobile-menu" class="fixed inset-0 bg-[#0A0A0A] z-[70] flex flex-col items-center justify-start pt-24 pb-16 gap-6 font-orbitron font-bold opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto">
+        <div id="mobile-menu" class="fixed inset-0 bg-[#0A0A0A] z-[70] flex flex-col items-center justify-center gap-6 font-orbitron font-bold opacity-0 pointer-events-none transition-opacity duration-300">
             <button id="close-menu-btn" class="absolute top-6 right-6 text-3xl text-lambo-blue"><i class="ph ph-x"></i></button>
             
             <a href="#products" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_store">STORE</a>
@@ -345,7 +344,7 @@
                     ENG <i class="ph-bold ph-caret-down"></i>
                 </button>
                 
-                <div class="absolute top-full mt-2 w-36 bg-[#111111] border border-gray-600 rounded-md shadow-[0_10px_40px_rgba(0,0,0,1)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-[80]">
+                <div class="absolute top-full mt-2 w-36 bg-[#111111] border border-gray-600 rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-[80]">
                     <button onclick="setLang('en'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
                     <button onclick="setLang('zh'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
                     <button onclick="setLang('es'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
@@ -355,15 +354,6 @@
             </div>
 
             <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm shrink-0"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
-        </div>
-
-            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
-        </div>
-
-            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
-        </div>
-
-            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
         </div>
     </nav>
 
