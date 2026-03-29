@@ -331,32 +331,31 @@
             </div>
         </div>
         
-        <div id="mobile-menu" class="fixed inset-0 bg-[#0A0A0A] z-[70] flex flex-col items-center justify-center gap-6 font-orbitron font-bold opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="mobile-menu" class="fixed top-0 left-0 w-full h-[65vh] bg-[#0A0A0A] border-b border-lambo-blue/20 z-[70] flex flex-col items-center justify-center gap-5 font-orbitron font-bold opacity-0 pointer-events-none transition-all duration-300 transform -translate-y-full">
             <button id="close-menu-btn" class="absolute top-6 right-6 text-3xl text-lambo-blue"><i class="ph ph-x"></i></button>
             
-            <a href="#products" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_store">STORE</a>
-            <a href="#features" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_features">FEATURES</a>
-            <a href="#reviews" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_reviews">REVIEWS</a>
-            <a href="#faq" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_faq">FAQ</a>
+            <a href="#products" class="mobile-link text-xl hover:text-lambo-blue transition-colors" data-i18n="nav_store">STORE</a>
+            <a href="#features" class="mobile-link text-xl hover:text-lambo-blue transition-colors" data-i18n="nav_features">FEATURES</a>
+            <a href="#reviews" class="mobile-link text-xl hover:text-lambo-blue transition-colors" data-i18n="nav_reviews">REVIEWS</a>
+            <a href="#faq" class="mobile-link text-xl hover:text-lambo-blue transition-colors" data-i18n="nav_faq">FAQ</a>
             
-            <div class="relative group mt-2 border-t border-white/20 pt-6 w-full flex justify-center">
-                <button class="flex items-center gap-2 text-2xl text-lambo-blue font-orbitron font-bold transition-colors cursor-pointer py-2" id="mobile-lang-toggle">
+            <div class="relative group mt-1 border-t border-white/10 pt-4 w-full flex justify-center">
+                <button class="flex items-center gap-2 text-xl text-lambo-blue font-orbitron font-bold transition-colors cursor-pointer py-1" id="mobile-lang-toggle">
                     ENG <i class="ph-bold ph-caret-down"></i>
                 </button>
                 
-                <div class="absolute top-full mt-2 w-36 bg-[#111111] border border-gray-600 rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-[80]">
-                    <button onclick="setLang('en'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
-                    <button onclick="setLang('zh'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
-                    <button onclick="setLang('es'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
-                    <button onclick="setLang('id'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ID</button>
-                    <button onclick="setLang('jp'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">JP</button>
+                <div class="absolute top-full mt-1 w-32 bg-[#111111] border border-gray-600 rounded-md shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-[80]">
+                    <button onclick="setLang('en'); toggleMobileMenu();" class="text-center px-4 py-2 text-base text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
+                    <button onclick="setLang('zh'); toggleMobileMenu();" class="text-center px-4 py-2 text-base text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
+                    <button onclick="setLang('es'); toggleMobileMenu();" class="text-center px-4 py-2 text-base text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
+                    <button onclick="setLang('id'); toggleMobileMenu();" class="text-center px-4 py-2 text-base text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ID</button>
+                    <button onclick="setLang('jp'); toggleMobileMenu();" class="text-center px-4 py-2 text-base text-white font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">JP</button>
                 </div>
             </div>
 
-            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm shrink-0"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
+            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo py-2 px-8 text-xs shrink-0"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
         </div>
     </nav>
-
     <section class="relative min-h-screen flex items-center justify-center bg-carbon-subtle pt-20 overflow-hidden">
         <div class="absolute top-1/2 left-1/4 w-96 h-96 bg-lambo-blue/10 rounded-full blur-[120px] -translate-y-1/2"></div>
         <div class="absolute bottom-0 right-1/4 w-[500px] h-[300px] bg-lambo-blue/5 rounded-full blur-[150px]"></div>
@@ -1238,6 +1237,11 @@
         function toggleMobileMenu() {
             mobileMenu.classList.toggle('opacity-0');
             mobileMenu.classList.toggle('pointer-events-none');
+            
+            // Tambahkan dua baris ini untuk efek slide dari atas ke bawah
+            mobileMenu.classList.toggle('-translate-y-full');
+            mobileMenu.classList.toggle('translate-y-0');
+            
             document.body.style.overflow = mobileMenu.classList.contains('opacity-0') ? '' : 'hidden';
         }
         document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
