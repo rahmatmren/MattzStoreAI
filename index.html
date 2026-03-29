@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MattzStore</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lambo: {
+                            black: '#0f0f0f',
+                            gray: '#1a1a1a',
+                            blue: '#00E5FF',
+                            blueHover: '#00B3CC'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        exo: ['"Exo 2"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'carbon': "linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px, linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px, linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px, linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px, linear-gradient(90deg, #1b1b1b 10px, transparent 10px), linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424 100%)",
+                    },
+                    backgroundSize: {
+                        'carbon-size': '20px 20px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Animations */
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen Split Animation */
+        .loader-half {
+            position: absolute;
+            inset: 0;
+            background-color: #0f0f0f; /* Match theme */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 1.2s cubic-bezier(0.86, 0, 0.07, 1); /* Cinematic ease */
+            z-index: 100;
+        }
+        .loader-half.top {
+            clip-path: inset(0 0 50% 0);
+        }
+        .loader-half.bottom {
+            clip-path: inset(50% 0 0 0);
+        }
+        .split-top {
+            transform: translateY(-100%);
+        }
+        .split-bottom {
+            transform: translateY(100%);
+        }
+
+        /* Shine Effect Text Animation */
+        .water-fill-text {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: rgba(0, 229, 255, 0.1); 
+            -webkit-text-stroke: 1px rgba(0, 229, 255, 0.3);
+            background-image: linear-gradient(
+                -45deg,
+                transparent 0%,
+                transparent 25%,
+                rgba(0, 229, 255, 0.8) 50%,
+                transparent 75%,
+                transparent 100%
+            );
+            background-size: 400px 100%;
+            background-repeat: no-repeat;
+            background-position: -400px 0%; 
+            -webkit-background-clip: text;
+            background-clip: text;
+            display: inline-block;
+        }
+
+        .bg-carbon-subtle {
+            background-image: repeating-linear-gradient(45deg, #121212 25%, transparent 25%, transparent 75%, #121212 75%, #121212), repeating-linear-gradient(45deg, #121212 25%, #0f0f0f 25%, #0f0f0f 75%, #121212 75%, #121212);
+            background-position: 0 0, 4px 4px;
+            background-size: 8px 8px;
+        }
+
+        .btn-lambo {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            background-color: #00E5FF;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transform: skewX(-15deg);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .btn-lambo > span {
+            transform: skewX(15deg);
+            z-index: 10;
+        }
+
+        .btn-lambo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+
+        .btn-lambo:hover:not(:disabled) {
+            background-color: #00B3CC;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+            transform: skewX(-15deg) scale(1.05);
+        }
+
+        .btn-lambo:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-lambo:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #00E5FF;
+            color: #00E5FF;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background-color: rgba(0, 229, 255, 0.1);
+            color: #00B3CC;
+        }
+
+        .lambo-card {
+            background-color: #1a1a1a;
+            border-top: 4px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .lambo-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, transparent 50%, #333 50%);
+            transition: all 0.3s ease;
+        }
+
+        .lambo-card:hover {
+            border-top-color: #00E5FF;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,229,255,0.1);
+        }
+        
+        .lambo-card:hover::after {
+            background: linear-gradient(135deg, transparent 50%, #00E5FF 50%);
+        }
+
+        .glass-panel {
+            background: rgba(26, 26, 26, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00E5FF; 
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            padding-bottom: 1rem;
+        }
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+            color: #00E5FF;
+        }
+
+        @keyframes marquee-ltr {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0%); }
+        }
+        .animate-marquee-ltr {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee-ltr 45s linear infinite;
+        }
+        @keyframes marquee-rtl {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee-rtl {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee-rtl 45s linear infinite;
+        }
+        .silhouette-text {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(80px, 12vw, 200px);
+            -webkit-text-stroke: 1px rgba(0, 229, 255, 0.15);
+            color: transparent;
+            text-shadow: 0 0 25px rgba(0, 229, 255, 0.15);
+            line-height: 1;
+            padding-right: 2rem;
+            user-select: none;
+            opacity: 0.6;
+        }
+
+        /* Modal Styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="font-exo antialiased selection:bg-lambo-blue selection:text-black">
+
+    <div id="main-loader" class="fixed inset-0 z-[9999] pointer-events-none">
+        <div class="loader-half top w-full h-full absolute inset-0">
+            <div class="text-center translate-y-[-10%] md:translate-y-[-5%]">
+                <h1 class="water-fill-text text-5xl md:text-7xl mb-4">MattzStore</h1>
+                <div class="text-lambo-blue font-orbitron text-2xl md:text-3xl font-bold mb-3 loading-percentage">0%</div>
+                <div class="text-gray-400 font-exo text-sm md:text-base h-6">
+                    <span class="typing-text"></span><span class="animate-pulse">|</span>
+                </div>
+            </div>
+        </div>
+        <div class="loader-half bottom w-full h-full absolute inset-0">
+            <div class="text-center translate-y-[-10%] md:translate-y-[-5%]">
+                <h1 class="water-fill-text text-5xl md:text-7xl mb-4">MattzStore</h1>
+                <div class="text-lambo-blue font-orbitron text-2xl md:text-3xl font-bold mb-3 loading-percentage">0%</div>
+                <div class="text-gray-400 font-exo text-sm md:text-base h-6">
+                    <span class="typing-text"></span><span class="animate-pulse">|</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed w-full z-50 glass-panel border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            
+            <div class="flex items-center gap-3 flex-1 justify-start">
+                <img src="assets/Pfp.jpg" alt="Logo" class="w-9 h-9 rounded-full object-cover border border-lambo-blue/50 shadow-[0_0_10px_rgba(0,229,255,0.3)]">
+                <span class="font-orbitron font-bold text-xl tracking-widest text-white">Mattz<span class="text-lambo-blue">Store</span></span>
+            </div>
+
+            <div class="hidden md:flex gap-8 font-semibold tracking-wide text-sm items-center justify-center flex-1">
+                <a href="#products" class="hover:text-lambo-blue transition-colors" data-i18n="nav_store">STORE</a>
+                <a href="#features" class="hover:text-lambo-blue transition-colors" data-i18n="nav_features">FEATURES</a>
+                <a href="#reviews" class="hover:text-lambo-blue transition-colors" data-i18n="nav_reviews">REVIEWS</a>
+                <a href="#faq" class="hover:text-lambo-blue transition-colors" data-i18n="nav_faq">FAQ</a>
+            </div>
+
+            <div class="hidden md:flex items-center gap-4 flex-1 justify-end">
+                <button onclick="window.location.href='https://wa.me/6288218472840'" class="btn-lambo py-2 px-6 text-sm">
+                    <span data-i18n="nav_support_btn">Support</span>
+                </button>
+                
+                <div class="relative group border-l border-white/20 pl-4">
+                    <button class="flex items-center gap-1 text-lambo-blue font-orbitron font-bold text-sm transition-colors cursor-pointer py-2" id="desktop-lang-toggle">
+                        ENG <i class="ph-bold ph-caret-down"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 w-24 bg-lambo-gray border border-gray-700 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden">
+                        <button onclick="setLang('en')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
+                        <button onclick="setLang('zh')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
+                        <button onclick="setLang('es')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
+                        <button onclick="setLang('id')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ID</button>
+                        <button onclick="setLang('jp')" class="text-left px-4 py-3 text-sm text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">JP</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:hidden flex-1 flex justify-end">
+                <button id="mobile-menu-btn" class="text-2xl text-lambo-blue"><i class="ph ph-list"></i></button>
+            </div>
+            
+        </div>
+        
+        <div id="mobile-menu" class="fixed inset-0 bg-lambo-black/95 backdrop-blur-xl z-[60] flex flex-col items-center justify-center gap-8 font-orbitron font-bold opacity-0 pointer-events-none transition-opacity duration-300">
+            <button id="close-menu-btn" class="absolute top-6 right-6 text-3xl text-lambo-blue"><i class="ph ph-x"></i></button>
+            <a href="#products" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_store">STORE</a>
+            <a href="#features" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_features">FEATURES</a>
+            <a href="#reviews" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_reviews">REVIEWS</a>
+            <a href="#faq" class="mobile-link text-2xl hover:text-lambo-blue transition-colors" data-i18n="nav_faq">FAQ</a>
+            
+            <div class="relative group mt-4 border-t border-white/10 pt-8 w-full flex justify-center">
+                <button class="flex items-center gap-2 text-2xl text-lambo-blue font-orbitron font-bold transition-colors cursor-pointer py-2" id="mobile-lang-toggle">
+                    ENG <i class="ph-bold ph-caret-down"></i>
+                </button>
+                <div class="absolute bottom-full mb-2 w-32 bg-lambo-gray border border-gray-700 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden z-50">
+                    <button onclick="setLang('en'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ENG</button>
+                    <button onclick="setLang('zh'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ZH</button>
+                    <button onclick="setLang('es'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ES</button>
+                    <button onclick="setLang('id'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">ID</button>
+                    <button onclick="setLang('jp'); toggleMobileMenu();" class="text-center px-4 py-3 text-lg text-gray-300 font-orbitron hover:bg-lambo-blue hover:text-black transition-colors">JP</button>
+                </div>
+            </div>
+
+            <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo mt-4 py-3 px-8 text-sm"><span data-i18n="nav_support_mobile">SUPPORT</span></a>
+        </div>
+    </nav>
+
+    <section class="relative min-h-screen flex items-center justify-center bg-carbon-subtle pt-20 overflow-hidden">
+        <div class="absolute top-1/2 left-1/4 w-96 h-96 bg-lambo-blue/10 rounded-full blur-[120px] -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-1/4 w-[500px] h-[300px] bg-lambo-blue/5 rounded-full blur-[150px]"></div>
+
+        <div class="absolute top-24 left-0 w-full overflow-hidden pointer-events-none z-0">
+            <div class="animate-marquee-rtl w-max">
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+            </div>
+        </div>
+
+        <div class="absolute bottom-12 md:bottom-20 left-0 w-full overflow-hidden pointer-events-none z-0">
+            <div class="animate-marquee-ltr w-max">
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+                <span class="silhouette-text">MattzStore</span>
+            </div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-6 text-center pb-28 md:pb-0 pt-10 md:pt-0">
+            <div class="inline-block mb-4 px-4 py-1 border border-lambo-blue/30 bg-lambo-blue/10 text-lambo-blue text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-sm rounded-sm" data-i18n="badge">
+                Next-Gen Digital Upgrades
+            </div>
+            <h1 class="font-orbitron font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight mb-6 uppercase text-white leading-none">
+                <span data-i18n="hero_title_1">Premium</span> <br />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-lambo-blue to-[#007BFF] text-glow" data-i18n="hero_title_2">Apps Store</span>
+            </h1>
+            <p class="text-gray-400 text-base sm:text-lg md:text-2xl mb-8 max-w-3xl mx-auto font-light" data-i18n="hero_desc">
+                Unlock <strong class="text-white font-semibold">Premium Features</strong> for Your Favorite Apps Instantly. No waiting, no limits.
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm md:text-base text-gray-300 font-semibold tracking-wide mb-12">
+                <span class="flex items-center gap-2"><i class="ph-fill ph-video-camera text-lambo-blue"></i> Alight Motion</span>
+                <span class="text-gray-600">•</span>
+                <span class="flex items-center gap-2"><i class="ph-fill ph-scissors text-lambo-blue"></i> CapCut Pro</span>
+                <span class="text-gray-600">•</span>
+                <span class="flex items-center gap-2"><i class="ph-fill ph-paint-brush-broad text-lambo-blue"></i> Canva Pro</span>
+                <span class="text-gray-600">•</span>
+                <span class="flex items-center gap-2"><i class="ph-fill ph-spotify-logo text-lambo-blue"></i> Spotify Premium</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo text-lg shadow-[0_0_20px_rgba(0,229,255,0.3)] w-full sm:w-auto">
+                    <span data-i18n="btn_buy_now_icon">BUY NOW <i class="ph-bold ph-arrow-right ml-2 inline-block"></i></span>
+                </a>
+                <a href="#products" class="btn-lambo btn-outline text-lg w-full sm:w-auto">
+                    <span data-i18n="btn_view_product">VIEW PRODUCT</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce opacity-50">
+            <span class="font-orbitron text-xs tracking-[0.3em] mb-2 uppercase" data-i18n="scroll">Scroll</span>
+            <i class="ph ph-caret-down text-xl"></i>
+        </div>
+    </section>
+
+    <section id="products" class="py-24 bg-lambo-black relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="font-orbitron font-bold text-4xl md:text-5xl uppercase tracking-wider mb-4"><span data-i18n="prod_title_1">The </span><span class="text-lambo-blue" data-i18n="prod_title_2">Product</span></h2>
+                <div class="w-24 h-1 bg-lambo-blue mx-auto mb-6 transform -skew-x-12"></div>
+                <p class="text-gray-400 max-w-2xl mx-auto mb-6" data-i18n="prod_desc">Select your high-performance app upgrade. Instant delivery directly to your account.</p>
+                <div class="inline-block px-4 py-2 border border-[#00E5FF]/30 bg-[#00E5FF]/10 text-[#00E5FF] text-sm md:text-base font-bold tracking-[0.1em] uppercase backdrop-blur-sm rounded-sm animate-pulse shadow-[0_0_15px_rgba(0,229,255,0.2)]" data-i18n="promo_banner">
+                    Opening Day Special: 50% OFF All Items!
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="lambo-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center shadow-lg border border-gray-700 mb-6 group-hover:border-lambo-blue transition-colors relative overflow-hidden">
+                        <i class="ph-fill ph-video-camera text-4xl text-white group-hover:text-lambo-blue transition-colors z-10"></i>
+                        <div class="absolute inset-0 bg-lambo-blue/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl mb-2">Alight Motion</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow" data-i18n="am_desc">Pro visual effects, motion graphics, and video editing unlocked.</p>
+                    <div class="text-2xl font-bold font-orbitron mb-6 text-white group-hover:text-lambo-blue transition-colors">
+                        <span class="text-sm text-gray-500 line-through block mb-1">Rp 15.000</span>Rp 7.000<span class="text-xs text-gray-500 font-exo block mt-1" data-i18n="yr">/ year</span>
+                    </div>
+                    <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo py-2 px-6 w-full text-sm">
+                        <span data-i18n="btn_buy_now">BUY NOW</span>
+                    </a>
+                </div>
+
+                <div class="lambo-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center shadow-lg border border-gray-700 mb-6 group-hover:border-lambo-blue transition-colors relative overflow-hidden">
+                        <i class="ph-fill ph-paint-brush-broad text-4xl text-white group-hover:text-lambo-blue transition-colors z-10"></i>
+                        <div class="absolute inset-0 bg-lambo-blue/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl mb-2">Canva Pro</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow" data-i18n="cv_desc">Unlimited premium assets, brand kits, and background remover.</p>
+                    <div class="text-2xl font-bold font-orbitron mb-6 text-white group-hover:text-lambo-blue transition-colors">
+                        <span class="text-sm text-gray-500 line-through block mb-1">Rp 10.000</span>Rp 5.000<span class="text-xs text-gray-500 font-exo block mt-1" data-i18n="mo">/ month</span>
+                    </div>
+                    <a href="https://wa.me/6288218472840" target="_blank" class="btn-lambo py-2 px-6 w-full text-sm">
+                        <span data-i18n="btn_buy_now">BUY NOW</span>
+                    </a>
+                </div>
+
+                <div class="lambo-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center shadow-lg border border-gray-700 mb-6 group-hover:border-lambo-blue transition-colors relative overflow-hidden">
+                        <i class="ph-fill ph-scissors text-4xl text-white group-hover:text-lambo-blue transition-colors z-10"></i>
+                        <div class="absolute inset-0 bg-lambo-blue/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl mb-2">CapCut Pro</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow" data-i18n="cc_desc">No watermark, premium templates, and advanced AI features.</p>
+                    <div class="text-xl font-bold font-orbitron mb-6 text-gray-500 uppercase tracking-widest" data-i18n="rev_coming">
+                        Coming Soon
+                    </div>
+                    <button disabled class="btn-lambo py-2 px-6 w-full text-sm">
+                        <span data-i18n="rev_coming">Coming Soon</span>
+                    </button>
+                </div>
+
+                <div class="lambo-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center shadow-lg border border-gray-700 mb-6 group-hover:border-lambo-blue transition-colors relative overflow-hidden">
+                        <i class="ph-fill ph-spotify-logo text-4xl text-white group-hover:text-lambo-blue transition-colors z-10"></i>
+                        <div class="absolute inset-0 bg-lambo-blue/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-xl mb-2">Spotify Premium</h3>
+                    <p class="text-gray-400 text-sm mb-6 flex-grow" data-i18n="sp_desc">Ad-free music listening, offline downloads, and highest audio quality.</p>
+                    <div class="text-xl font-bold font-orbitron mb-6 text-gray-500 uppercase tracking-widest" data-i18n="rev_coming">
+                        Coming Soon
+                    </div>
+                    <button disabled class="btn-lambo py-2 px-6 w-full text-sm">
+                        <span data-i18n="rev_coming">Coming Soon</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ai-advisor" class="py-20 bg-carbon-subtle border-y border-white/5 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-[#00E5FF]/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-[#007BFF]/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-lambo-black border border-gray-700 shadow-[0_0_20px_rgba(0,229,255,0.15)] mb-4">
+                    <i class="ph-fill ph-sparkle text-3xl text-lambo-blue animate-pulse"></i>
+                </div>
+                <h2 class="font-orbitron font-bold text-3xl md:text-4xl uppercase tracking-wider mb-3">
+                    <span data-i18n="ai_title_1">Not sure what to </span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#007BFF]" data-i18n="ai_title_2">Choose?</span>
+                </h2>
+                <p class="text-gray-400" data-i18n="ai_subtitle">Tell our AI what you want to create, and we'll recommend the perfect app for you.</p>
+            </div>
+
+            <div class="bg-lambo-gray/80 backdrop-blur-md border border-gray-800 p-6 md:p-8 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-lambo-blue to-transparent"></div>
+                
+                <div class="flex flex-col gap-4">
+                    <textarea id="ai-input" rows="3" class="w-full bg-lambo-black border border-gray-700 text-white px-5 py-4 font-exo text-sm md:text-base focus:outline-none focus:border-lambo-blue focus:shadow-[0_0_15px_rgba(0,229,255,0.2)] transition-all resize-none placeholder-gray-600" placeholder="E.g., I want to edit a cinematic vlog..."></textarea>
+                    
+                    <button id="ai-btn" onclick="askAI()" class="btn-lambo w-full md:w-auto self-end py-3 px-8 text-sm group">
+                        <span class="flex items-center gap-2" id="ai-btn-text">
+                            <span data-i18n="ai_btn">ASK AI</span>
+                            <i class="ph-fill ph-sparkle"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <div id="ai-output-box" class="mt-6 p-5 bg-[#00E5FF]/5 border border-[#00E5FF]/20 rounded-sm hidden opacity-0 transition-opacity duration-500">
+                    <div class="flex gap-3">
+                        <i class="ph-fill ph-robot text-2xl text-lambo-blue shrink-0"></i>
+                        <div id="ai-output-text" class="text-gray-300 font-exo text-sm md:text-base leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ai-content-generator" class="py-20 bg-[#0a0a0a] border-b border-white/5 relative overflow-hidden">
+        <div class="absolute top-1/2 right-1/4 w-72 h-72 bg-[#00E5FF]/5 rounded-full blur-[80px] pointer-events-none transform -translate-y-1/2"></div>
+
+        <div class="max-w-4xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <div class="w-full md:w-1/2 text-center md:text-left">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-lambo-black border border-gray-700 shadow-[0_0_15px_rgba(0,229,255,0.1)] mb-4">
+                    <i class="ph-fill ph-lightbulb text-2xl text-lambo-yellow animate-bounce"></i>
+                </div>
+                <h2 class="font-orbitron font-bold text-3xl uppercase tracking-wider mb-3">
+                    <span data-i18n="idea_title_1">Need Content </span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC300] to-[#FF8C00]" data-i18n="idea_title_2">Ideas? ✨</span>
+                </h2>
+                <p class="text-gray-400 text-sm md:text-base" data-i18n="idea_subtitle">Tell AI your hobby or job, and get viral content ideas tailored just for you, plus the best apps to make them!</p>
+            </div>
+
+            <div class="w-full md:w-1/2 bg-lambo-gray/60 border border-gray-800 p-6 rounded-lg shadow-2xl relative">
+                <div class="flex flex-col gap-4">
+                    <input type="text" id="idea-input" class="w-full bg-lambo-black border border-gray-700 text-white px-4 py-3 font-exo text-sm focus:outline-none focus:border-[#FFC300] focus:shadow-[0_0_10px_rgba(255,195,0,0.2)] transition-all placeholder-gray-600 rounded-sm" placeholder="E.g., I love gaming and coffee...">
+                    
+                    <button id="idea-btn" onclick="generateIdeasAI()" class="relative inline-flex items-center justify-center py-3 px-6 bg-[#FFC300] text-black font-orbitron font-bold text-sm uppercase tracking-wider overflow-hidden group transition-all hover:bg-[#FFE066] hover:shadow-[0_0_20px_rgba(255,195,0,0.4)]">
+                        <span class="relative z-10 flex items-center gap-2" id="idea-btn-text">
+                            <span data-i18n="idea_btn">GENERATE IDEAS</span>
+                            <i class="ph-fill ph-magic-wand"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <div id="idea-output-box" class="mt-4 p-4 bg-black/50 border border-gray-700 rounded-sm hidden opacity-0 transition-opacity duration-500 max-h-64 overflow-y-auto custom-scrollbar">
+                    <div id="idea-output-text" class="text-gray-300 font-exo text-sm leading-relaxed space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 bg-[#141414] border-y border-white/5 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-lambo-blue/5 skew-x-[-30deg] translate-x-32 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-orbitron font-bold text-3xl md:text-4xl uppercase tracking-wider mb-2"><span data-i18n="feat_title_1">Engineered for </span><span class="text-lambo-blue" data-i18n="feat_title_2">Excellence</span></h2>
+                <p class="text-gray-400" data-i18n="feat_desc">Why thousands choose our premium upgrades.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                <div class="bg-lambo-gray/50 border border-gray-800 p-6 flex items-start gap-4 hover:border-lambo-blue/50 transition-colors group">
+                    <div class="bg-lambo-black p-3 text-lambo-blue transform -skew-x-12 border border-gray-800 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-shadow">
+                        <i class="ph-fill ph-lightning text-2xl transform skew-x-12 block"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg mb-1 uppercase tracking-wide" data-i18n="feat_1_title">Instant Activation</h4>
+                        <p class="text-gray-400 text-sm" data-i18n="feat_1_desc">Lightning-fast processing. Upgrade applied to your account within minutes of purchase.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-lambo-gray/50 border border-gray-800 p-6 flex items-start gap-4 hover:border-lambo-blue/50 transition-colors group">
+                    <div class="bg-lambo-black p-3 text-lambo-blue transform -skew-x-12 border border-gray-800 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-shadow">
+                        <i class="ph-fill ph-tag text-2xl transform skew-x-12 block"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg mb-1 uppercase tracking-wide" data-i18n="feat_2_title">Affordable Prices</h4>
+                        <p class="text-gray-400 text-sm" data-i18n="feat_2_desc">Experience luxury digital services at a fraction of the official retail cost.</p>
+                    </div>
+                </div>
+
+                <div class="bg-lambo-gray/50 border border-gray-800 p-6 flex items-start gap-4 hover:border-lambo-blue/50 transition-colors group">
+                    <div class="bg-lambo-black p-3 text-lambo-blue transform -skew-x-12 border border-gray-800 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-shadow">
+                        <i class="ph-fill ph-headset text-2xl transform skew-x-12 block"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg mb-1 uppercase tracking-wide" data-i18n="feat_3_title">Fast Support</h4>
+                        <p class="text-gray-400 text-sm" data-i18n="feat_3_desc">Dedicated WhatsApp support team ready to assist you like a pit crew.</p>
+                    </div>
+                </div>
+
+                <div class="bg-lambo-gray/50 border border-gray-800 p-6 flex items-start gap-4 hover:border-lambo-blue/50 transition-colors group">
+                    <div class="bg-lambo-black p-3 text-lambo-blue transform -skew-x-12 border border-gray-800 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-shadow">
+                        <i class="ph-fill ph-users text-2xl transform skew-x-12 block"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg mb-1 uppercase tracking-wide" data-i18n="feat_4_title">Trusted Community</h4>
+                        <p class="text-gray-400 text-sm" data-i18n="feat_4_desc">Join thousands of satisfied creators and users driving their digital life forward.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="py-24 bg-carbon-subtle">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <div>
+                    <h2 class="font-orbitron font-bold text-4xl uppercase tracking-wider mb-2"><span data-i18n="rev_title_1">Customer </span><span class="text-lambo-blue" data-i18n="rev_title_2">Testimonials</span></h2>
+                    <div class="w-24 h-1 bg-lambo-blue transform -skew-x-12"></div>
+                </div>
+                <div class="mt-4 md:mt-0 text-gray-400 text-sm font-semibold tracking-widest uppercase" data-i18n="rev_desc">
+                    Proven Track Record
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-10">
+                <button onclick="toggleReviews()" class="btn-lambo py-2 px-8 text-sm group">
+                    <span class="flex items-center gap-2">
+                        <span id="toggle-reviews-text" data-i18n="btn_show_reviews">SHOW REVIEWS</span>
+                        <i class="ph-bold ph-caret-down transition-transform duration-500" id="toggle-reviews-icon"></i>
+                    </span>
+                </button>
+            </div>
+
+            <div id="reviews-wrapper" class="grid transition-all duration-[800ms] ease-in-out opacity-0" style="grid-template-rows: 0fr;">
+                <div class="overflow-hidden min-h-0">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 py-4">
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+
+                        <div class="bg-lambo-gray p-6 border border-gray-800 relative opacity-80">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-600 to-transparent"></div>
+                            <div class="w-full aspect-[9/16] bg-lambo-black border border-gray-700 mb-6 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <i class="ph ph-hourglass-high text-4xl text-gray-600 mb-2 animate-pulse"></i>
+                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest" data-i18n="rev_pending">Pending Upload</span>
+                            </div>
+                            <div class="flex justify-center text-gray-700 mb-3 text-sm">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                            </div>
+                            <p class="text-gray-400 font-orbitron text-center font-bold text-xl uppercase tracking-widest my-4" data-i18n="rev_coming">Coming Soon</p>
+                            <div class="mt-4 text-xs text-center font-orbitron text-gray-600 uppercase" data-i18n="rev_stay">— Stay Tuned</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-24 flex flex-col items-center justify-center text-center relative">
+                <div class="absolute w-64 h-64 bg-[#25D366]/10 rounded-full blur-[80px] pointer-events-none"></div>
+                <p class="text-gray-300 font-orbitron text-lg md:text-2xl uppercase tracking-widest mb-8 leading-relaxed relative z-10">
+                    <span data-i18n="rev_more_1">Want to see more testimonials?</span><br>
+                    <span class="text-[#25D366] font-black text-glow" data-i18n="rev_more_2">Join the WhatsApp channel below.</span>
+                </p>
+                <a href="https://whatsapp.com/channel/0029VbCEBhtDuMRfoOx3aD2M" target="_blank" class="wa-join-btn w-20 h-20 md:w-24 md:h-24 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_0_25px_rgba(37,211,102,0.3)] hover:scale-110 hover:shadow-[0_0_40px_rgba(37,211,102,0.6)] transition-all duration-300 relative overflow-hidden group border-2 border-transparent hover:border-white/50 z-10">
+                    <i class="ph-fill ph-whatsapp-logo text-5xl md:text-6xl text-white relative z-10 group-hover:rotate-12 transition-transform duration-300"></i>
+                    <div class="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 rounded-full transition-transform duration-300 origin-center"></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-lambo-black relative border-y border-white/5">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#00f2fe]/5 to-[#4facfe]/5 pointer-events-none"></div>
+        <div class="max-w-5xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between bg-lambo-gray/80 border border-gray-800 p-10 md:p-14 overflow-hidden group hover:border-white/20 transition-colors">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-[#00f2fe]/20 rounded-full blur-3xl group-hover:bg-[#ff0050]/20 transition-colors duration-700"></div>
+            <div class="text-center md:text-left mb-8 md:mb-0">
+                <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+                    <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center border border-gray-700 shadow-[0_0_15px_rgba(255,255,255,0.1)] overflow-hidden">
+                        <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                        </svg>
+                    </div>
+                    <h2 class="font-orbitron font-bold text-3xl uppercase tracking-widest text-white"><span data-i18n="tk_title_1">Follow Our </span><span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f2fe] to-[#ff0050]" data-i18n="tk_title_2">TikTok</span></h2>
+                </div>
+                <p class="text-gray-400 max-w-md text-lg" data-i18n="tk_desc">Don't forget to follow the TikTok owner, there will be random anime edits and anime updates from several trusted sources</p>
+            </div>
+            <a href="https://www.tiktok.com/@mattwithmiku?_r=1&_t=ZS-950YFRnyNH8" target="_blank" class="btn-lambo py-3 px-8 shadow-[0_0_20px_rgba(0,229,255,0.2)]">
+                <span data-i18n="tk_btn">VIEW TIKTOK <i class="ph-bold ph-arrow-up-right ml-2 inline-block"></i></span>
+            </a>
+        </div>
+    </section>
+
+    <section id="faq" class="py-24 bg-[#111111]">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="font-orbitron font-bold text-3xl md:text-4xl uppercase tracking-wider mb-2"><span data-i18n="faq_title_1">Frequently Asked </span><span class="text-lambo-blue" data-i18n="faq_title_2">Questions</span></h2>
+                <div class="w-24 h-1 bg-lambo-blue mx-auto transform -skew-x-12"></div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="faq-item bg-lambo-gray border border-gray-800 cursor-pointer hover:border-gray-600 transition-colors">
+                    <div class="px-6 py-5 flex justify-between items-center" onclick="toggleFaq(this)">
+                        <h4 class="font-orbitron font-bold text-lg tracking-wide" data-i18n="faq_1_q">How long does activation take?</h4>
+                        <i class="ph-bold ph-plus text-xl text-gray-400 faq-icon transition-transform duration-300"></i>
+                    </div>
+                    <div class="faq-answer px-6 bg-[#161616]">
+                        <p class="text-gray-400 text-sm pb-4" data-i18n="faq_1_a">Activation is almost instant! Usually, it takes between 1 to 5 minutes after payment confirmation during our operational hours.</p>
+                    </div>
+                </div>
+                <div class="faq-item bg-lambo-gray border border-gray-800 cursor-pointer hover:border-gray-600 transition-colors">
+                    <div class="px-6 py-5 flex justify-between items-center" onclick="toggleFaq(this)">
+                        <h4 class="font-orbitron font-bold text-lg tracking-wide" data-i18n="faq_2_q">What payment methods are accepted?</h4>
+                        <i class="ph-bold ph-plus text-xl text-gray-400 faq-icon transition-transform duration-300"></i>
+                    </div>
+                    <div class="faq-answer px-6 bg-[#161616]">
+                        <p class="text-gray-400 text-sm pb-4" data-i18n="faq_2_a">We accept payments via DANA and GoPay for your convenience.</p>
+                    </div>
+                </div>
+                <div class="faq-item bg-lambo-gray border border-gray-800 cursor-pointer hover:border-gray-600 transition-colors">
+                    <div class="px-6 py-5 flex justify-between items-center" onclick="toggleFaq(this)">
+                        <h4 class="font-orbitron font-bold text-lg tracking-wide" data-i18n="faq_3_q">What if the account stops working?</h4>
+                        <i class="ph-bold ph-plus text-xl text-gray-400 faq-icon transition-transform duration-300"></i>
+                    </div>
+                    <div class="faq-answer px-6 bg-[#161616]">
+                        <p class="text-gray-400 text-sm pb-4" data-i18n="faq_3_a">We provide an activation warranty for 24 hours after purchase. If any issues occur, please contact support.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-lambo-black border-t border-white/10 pt-16 pb-8 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+                <div class="flex items-center gap-3 mb-6 md:mb-0">
+                    <img src="assets/Pfp.jpg" alt="Logo" class="w-11 h-11 rounded-full object-cover border border-lambo-blue/50">
+                    <span class="font-orbitron font-black text-2xl tracking-widest text-white">Mattz<span class="text-lambo-blue">Store</span></span>
+                </div>
+                <div class="flex gap-6">
+                    <a href="https://www.instagram.com/rahmattzm/" target="_blank" class="w-10 h-10 bg-lambo-gray rounded-sm flex items-center justify-center text-white hover:bg-lambo-blue hover:text-black transition-colors"><i class="ph-fill ph-instagram-logo text-xl"></i></a>
+                    <a href="https://www.tiktok.com/@mattwithmiku?_r=1&_t=ZS-950YFRnyNH8" target="_blank" class="w-10 h-10 bg-lambo-gray rounded-sm flex items-center justify-center text-white hover:bg-lambo-blue hover:text-black transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                    </a>
+                    <a href="https://wa.me/6288218472840" target="_blank" class="w-10 h-10 bg-lambo-gray rounded-sm flex items-center justify-center text-white hover:bg-lambo-blue hover:text-black transition-colors"><i class="ph-fill ph-whatsapp-logo text-xl"></i></a>
+                </div>
+            </div>
+            
+            <div class="text-center md:text-left text-gray-600 text-sm font-exo flex flex-col md:flex-row justify-between items-center border-t border-white/5 pt-8">
+                <p data-i18n="foot_cr">&copy; 2026 MattzStore Digital Store. All rights reserved.</p>
+                <div class="mt-4 md:mt-0 flex gap-4">
+                    <button onclick="openModal('privacy')" class="hover:text-lambo-blue transition-colors" data-i18n="foot_priv">Privacy Policy</button>
+                    <button onclick="openModal('tos')" class="hover:text-lambo-blue transition-colors" data-i18n="foot_tos">Terms of Service</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 font-orbitron font-black text-[150px] md:text-[250px] text-white/[0.02] whitespace-nowrap pointer-events-none select-none">
+            PREMIUM
+        </div>
+    </footer>
+
+    <div class="fixed bottom-6 right-6 z-50 group">
+        <div class="absolute right-[4.5rem] top-1/2 -translate-y-1/2 bg-lambo-gray border border-gray-700 text-white text-sm font-exo px-4 py-2 rounded-sm shadow-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none text-center w-max">
+            <span data-i18n="wa_tooltip">mau tanya tanyaaa?<br>klik logo whatsapp di samping atau tombol support di atas yaa</span>
+            <div class="absolute top-1/2 -right-2 -translate-y-1/2 border-t-[6px] border-t-transparent border-l-[8px] border-l-gray-700 border-b-[6px] border-b-transparent"></div>
+        </div>
+        <a href="https://wa.me/6288218472840" target="_blank" class="flex w-16 h-16 bg-[#25D366] rounded-full items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.4)] transition-all duration-300 relative overflow-hidden group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(37,211,102,0.6)] cursor-pointer">
+            <i class="ph-fill ph-whatsapp-logo text-4xl text-white relative z-10"></i>
+            <div class="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 rounded-full transition-transform duration-300 origin-center pointer-events-none"></div>
+        </a>
+    </div>
+
+    <div id="legal-modal" class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div id="legal-modal-content" class="bg-lambo-gray border border-gray-700 w-full max-w-2xl max-h-[80vh] flex flex-col relative z-10 transform scale-95 transition-transform duration-300 shadow-[0_0_40px_rgba(0,229,255,0.15)]">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00E5FF] to-transparent"></div>
+            <div class="flex justify-between items-center p-6 border-b border-gray-800">
+                <h3 id="legal-modal-title" class="font-orbitron font-bold text-xl md:text-2xl text-white uppercase tracking-wider">Title</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-[#00E5FF] transition-colors p-1"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <div id="legal-modal-body" class="p-6 overflow-y-auto custom-scrollbar text-gray-300 font-exo text-sm md:text-base leading-relaxed space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const i18nData = {
+            en: {
+                nav_store: "STORE", nav_features: "FEATURES", nav_reviews: "REVIEWS", nav_faq: "FAQ",
+                nav_support_btn: "Support", nav_support_mobile: "SUPPORT", badge: "Next-Gen Digital Upgrades",
+                hero_title_1: "Premium", hero_title_2: "Apps Store",
+                hero_desc: "Unlock <strong class='text-white font-semibold'>Premium Features</strong> for Your Favorite Apps Instantly.",
+                btn_buy_now_icon: "BUY NOW <i class='ph-bold ph-arrow-right ml-2 inline-block'></i>", btn_view_product: "VIEW PRODUCT",
+                scroll: "Scroll", prod_title_1: "The ", prod_title_2: "Product", prod_desc: "Select your high-performance app upgrade.",
+                promo_banner: "Opening Day Special: 50% OFF All Items!", am_desc: "Pro visual effects unlocked.",
+                mo: "/ month", yr: "/ year", btn_buy_now: "BUY NOW", cc_desc: "Advanced AI features.",
+                cv_desc: "Unlimited premium assets.", sp_desc: "Ad-free music listening.",
+                ai_title_1: "Not sure what to ", ai_title_2: "Choose?", ai_subtitle: "Tell our AI what you want.",
+                ai_placeholder: "E.g., I want to edit a cinematic vlog...", ai_btn: "ASK AI", ai_loading: "Thinking... ✨",
+                ai_error: "Oops! Try again later.", idea_title_1: "Need Content ", idea_title_2: "Ideas? ✨",
+                idea_subtitle: "Get viral content ideas.", idea_placeholder: "E.g., I love gaming...", idea_btn: "GENERATE IDEAS",
+                feat_title_1: "Engineered for ", feat_title_2: "Excellence", feat_desc: "Why thousands choose us.",
+                feat_1_title: "Instant Activation", feat_1_desc: "Lightning-fast processing.",
+                feat_2_title: "Affordable Prices", feat_2_desc: "Luxury services at lower costs.",
+                feat_3_title: "Fast Support", feat_3_desc: "Dedicated WhatsApp team.",
+                feat_4_title: "Trusted Community", feat_4_desc: "Join thousands of users.",
+                rev_title_1: "Customer ", rev_title_2: "Testimonials", rev_desc: "Proven Track Record",
+                rev_pending: "Pending Upload", rev_coming: "Coming Soon", rev_stay: "— Stay Tuned",
+                rev_more_1: "Want to see more testimonials?", rev_more_2: "Join the WhatsApp channel below.",
+                btn_show_reviews: "SHOW REVIEWS", btn_hide_reviews: "HIDE REVIEWS",
+                tk_title_1: "Follow Our ", tk_title_2: "TikTok", tk_desc: "Updates from trusted sources.",
+                tk_btn: "VIEW TIKTOK <i class='ph-bold ph-arrow-up-right ml-2 inline-block'></i>",
+                faq_title_1: "Frequently Asked ", faq_title_2: "Questions",
+                faq_1_q: "How long does activation take?", faq_1_a: "Usually between 1 to 5 minutes.",
+                faq_2_q: "What payment methods are accepted?", faq_2_a: "DANA and GoPay.",
+                faq_3_q: "What if the account stops working?", faq_3_a: "24-hour activation warranty.",
+                foot_cr: "&copy; 2026 MattzStore Digital Store. All rights reserved.",
+                foot_tos: "Terms of Service", foot_priv: "Privacy Policy",
+                wa_tooltip: "mau tanya tanyaaa?<br>klik logo whatsapp di samping atau tombol support di atas yaa",
+                modal_tos_title: "Terms of Service",
+                modal_tos_content: "1. <strong>Acceptance:</strong> By using MattzStore, you agree to these terms.<br><br>2. <strong>Digital Goods:</strong> Sales are final. 24h warranty provided.<br><br>3. <strong>Conduct:</strong> Do not misuse accounts.<br><br>4. <strong>Changes:</strong> Terms may change without notice.",
+                modal_priv_title: "Privacy Policy",
+                modal_priv_content: "1. <strong>Collection:</strong> We only collect order data.<br><br>2. <strong>Usage:</strong> Data used for orders only.<br><br>3. <strong>Security:</strong> We protect your data.<br><br>4. <strong>Contact:</strong> Use WhatsApp for privacy issues."
+            },
+            id: {
+                nav_store: "PRODUK", nav_features: "FITUR", nav_reviews: "ULASAN", nav_faq: "FAQ",
+                nav_support_btn: "Bantuan", nav_support_mobile: "BANTUAN", badge: "Peningkatan Digital Generasi Berikutnya",
+                hero_title_1: "Premium", hero_title_2: "Toko Aplikasi",
+                hero_desc: "Buka <strong class='text-white font-semibold'>Fitur Premium</strong> untuk Aplikasi Favorit Anda Secara Instan.",
+                btn_buy_now_icon: "BELI SEKARANG <i class='ph-bold ph-arrow-right ml-2 inline-block'></i>", btn_view_product: "LIHAT PRODUK",
+                scroll: "Gulir", prod_title_1: "Daftar ", prod_title_2: "Produk", prod_desc: "Pilih peningkatan aplikasi berkinerja tinggi Anda.",
+                promo_banner: "Spesial Hari Pembukaan: Diskon 50% Semua Item!", am_desc: "Efek visual pro terbuka.",
+                mo: "/ bulan", yr: "/ tahun", btn_buy_now: "BELI SEKARANG", cc_desc: "Fitur AI tingkat lanjut.",
+                cv_desc: "Aset premium tak terbatas.", sp_desc: "Dengarkan musik tanpa iklan.",
+                ai_title_1: "Bingung mau pilih ", ai_title_2: "Yang Mana?", ai_subtitle: "Ceritakan apa yang ingin kamu buat.",
+                ai_placeholder: "Misal: Aku mau edit vlog sinematik...", ai_btn: "TANYA AI", ai_loading: "Menganalisis... ✨",
+                ai_error: "Oops! Coba lagi nanti.", idea_title_1: "Butuh Ide ", idea_title_2: "Konten? ✨",
+                idea_subtitle: "Dapatkan ide konten viral.", idea_placeholder: "Misal: Aku suka main game...", idea_btn: "BUAT IDE KONTEN",
+                feat_title_1: "Dirancang untuk ", feat_title_2: "Keunggulan", feat_desc: "Mengapa ribuan orang memilih kami.",
+                feat_1_title: "Aktivasi Instan", feat_1_desc: "Pemrosesan secepat kilat.",
+                feat_2_title: "Harga Terjangkau", feat_2_desc: "Layanan mewah harga murah.",
+                feat_3_title: "Dukungan Cepat", feat_3_desc: "Tim WhatsApp khusus.",
+                feat_4_title: "Komunitas Terpercaya", feat_4_desc: "Bergabung dengan ribuan kreator.",
+                rev_title_1: "Ulasan ", rev_title_2: "Pelanggan", rev_desc: "Rekam Jejak Terbukti",
+                rev_pending: "Menunggu Unggahan", rev_coming: "Segera Hadir", rev_stay: "— Tetap Pantau",
+                rev_more_1: "Ingin melihat lebih banyak ulasan?", rev_more_2: "Bergabunglah dengan saluran WhatsApp di bawah ini.",
+                btn_show_reviews: "TAMPILKAN ULASAN", btn_hide_reviews: "SEMBUNYIKAN ULASAN",
+                tk_title_1: "Ikuti ", tk_title_2: "TikTok Kami", tk_desc: "Update anime dari sumber terpercaya.",
+                tk_btn: "LIHAT TIKTOK <i class='ph-bold ph-arrow-up-right ml-2 inline-block'></i>",
+                faq_title_1: "Pertanyaan yang Sering ", faq_title_2: "Diajukan",
+                faq_1_q: "Berapa lama proses aktivasinya?", faq_1_a: "Biasanya antara 1 hingga 5 menit.",
+                faq_2_q: "Metode pembayaran apa saja yang diterima?", faq_2_a: "DANA dan GoPay.",
+                faq_3_q: "Bagaimana jika akun berhenti berfungsi?", faq_3_a: "Garansi aktivasi 24 jam.",
+                foot_cr: "&copy; 2026 MattzStore Digital Store. Hak Cipta Dilindungi.",
+                foot_tos: "Syarat & Ketentuan", foot_priv: "Kebijakan Privasi",
+                wa_tooltip: "mau tanya tanyaaa?<br>klik logo whatsapp di samping atau tombol support di atas yaa",
+                modal_tos_title: "Syarat & Ketentuan",
+                modal_tos_content: "1. <strong>Penerimaan:</strong> Dengan bertransaksi, Anda setuju dengan syarat ini.<br><br>2. <strong>Barang Digital:</strong> Penjualan bersifat final. Garansi 24 jam.<br><br>3. <strong>Perilaku:</strong> Jangan menyalahgunakan akun.<br><br>4. <strong>Perubahan:</strong> Syarat dapat berubah sewaktu-waktu.",
+                modal_priv_title: "Kebijakan Privasi",
+                modal_priv_content: "1. <strong>Pengumpulan:</strong> Kami hanya mengumpulkan data pesanan.<br><br>2. <strong>Penggunaan:</strong> Data khusus untuk penyelesaian pesanan.<br><br>3. <strong>Keamanan:</strong> Kami melindungi informasi pribadi Anda.<br><br>4. <strong>Kontak:</strong> Hubungi support untuk privasi."
+            }
+        };
+
+        let currentLang = 'en';
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18nData[lang] && i18nData[lang][key]) el.innerHTML = i18nData[lang][key];
+            });
+            const langLabel = lang.toUpperCase();
+            document.getElementById('desktop-lang-toggle').innerHTML = `${langLabel} <i class="ph-bold ph-caret-down"></i>`;
+            document.getElementById('mobile-lang-toggle').innerHTML = `${langLabel} <i class="ph-bold ph-caret-down"></i>`;
+        }
+
+        // Loading Logic
+        document.addEventListener("DOMContentLoaded", () => {
+            const percentages = document.querySelectorAll('.loading-percentage');
+            const textToType = "Menyiapkan yang terbaik untuk anda 😇";
+            const typingElements = document.querySelectorAll('.typing-text');
+            let charIndex = 0;
+            const typeWriter = setInterval(() => {
+                if (charIndex < textToType.length) {
+                    typingElements.forEach(el => el.textContent += textToType.charAt(charIndex));
+                    charIndex++;
+                } else clearInterval(typeWriter);
+            }, 50);
+
+            let progress = 0;
+            const loadInterval = setInterval(() => {
+                progress += 1.5;
+                if (progress >= 100) progress = 100;
+                percentages.forEach(el => el.textContent = `${Math.floor(progress)}%`);
+                if (progress === 100) {
+                    clearInterval(loadInterval);
+                    setTimeout(() => {
+                        document.querySelector('.loader-half.top').classList.add('split-top');
+                        document.querySelector('.loader-half.bottom').classList.add('split-bottom');
+                        document.body.style.overflow = '';
+                        setTimeout(() => document.getElementById('main-loader').remove(), 1200);
+                    }, 400); 
+                }
+            }, 30);
+        });
+
+       // Mengubah format Markdown tebal (**teks**) menjadi HTML (<strong>teks</strong>) dan line break
+       function formatAIResponse(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-lambo-blue">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // AI Logic untuk Advisor
+        async function askAI() {
+            const outputBox = document.getElementById('ai-output-box');
+            const outputText = document.getElementById('ai-output-text');
+            const inputEl = document.getElementById('ai-input');
+            const prompt = inputEl.value.trim();
+            const btnText = document.getElementById('ai-btn-text');
+            const originalBtnHtml = btnText.innerHTML;
+
+            if (!prompt) return;
+
+            // UI Loading State
+            outputBox.classList.remove('hidden');
+            setTimeout(() => outputBox.classList.remove('opacity-0'), 50);
+            outputText.innerHTML = i18nData[currentLang]['ai_loading'] || "Thinking... ✨";
+            btnText.innerHTML = `<i class="ph ph-spinner animate-spin"></i>`;
+            inputEl.disabled = true;
+
+            try {
+                // Request ke Vercel Backend
+                const response = await fetch('/api/advisor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.result) {
+                    outputText.innerHTML = formatAIResponse(data.result);
+                } else {
+                    outputText.innerHTML = data.error || (i18nData[currentLang]['ai_error'] || "Oops! Try again later.");
+                }
+            } catch (error) {
+                console.error(error);
+                outputText.innerHTML = i18nData[currentLang]['ai_error'] || "Oops! Connection error. Try again later.";
+            } finally {
+                // Restore UI
+                btnText.innerHTML = originalBtnHtml;
+                inputEl.disabled = false;
+            }
+        }
+
+        // AI Logic untuk Content Ideas
+        async function generateIdeasAI() {
+            const outputBox = document.getElementById('idea-output-box');
+            const outputText = document.getElementById('idea-output-text');
+            const inputEl = document.getElementById('idea-input');
+            const prompt = inputEl.value.trim();
+            const btnText = document.getElementById('idea-btn-text');
+            const originalBtnHtml = btnText.innerHTML;
+
+            if (!prompt) return;
+
+            // UI Loading State
+            outputBox.classList.remove('hidden');
+            setTimeout(() => outputBox.classList.remove('opacity-0'), 50);
+            outputText.innerHTML = "Generating creative ideas... ✨";
+            btnText.innerHTML = `<i class="ph ph-spinner animate-spin"></i>`;
+            inputEl.disabled = true;
+
+            try {
+                // Request ke Vercel Backend
+                const response = await fetch('/api/ideas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.result) {
+                    outputText.innerHTML = formatAIResponse(data.result);
+                } else {
+                    outputText.innerHTML = data.error || "Oops! Failed to generate ideas. Try again later.";
+                }
+            } catch (error) {
+                console.error(error);
+                outputText.innerHTML = "Oops! Connection error. Try again later.";
+            } finally {
+                // Restore UI
+                btnText.innerHTML = originalBtnHtml;
+                inputEl.disabled = false;
+            }
+        }
+
+        // UI Logic
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) navbar.classList.add('bg-lambo-black/95', 'shadow-lg');
+            else navbar.classList.remove('bg-lambo-black/95', 'shadow-lg');
+        });
+
+        function toggleFaq(element) {
+            element.parentElement.classList.toggle('active');
+        }
+
+        const mobileMenu = document.getElementById('mobile-menu');
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('opacity-0');
+            mobileMenu.classList.toggle('pointer-events-none');
+            document.body.style.overflow = mobileMenu.classList.contains('opacity-0') ? '' : 'hidden';
+        }
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+        document.getElementById('close-menu-btn').addEventListener('click', toggleMobileMenu);
+
+        let reviewsExpanded = false;
+        function toggleReviews() {
+            const wrapper = document.getElementById('reviews-wrapper');
+            const icon = document.getElementById('toggle-reviews-icon');
+            const textSpan = document.getElementById('toggle-reviews-text');
+            reviewsExpanded = !reviewsExpanded;
+            if (reviewsExpanded) {
+                wrapper.style.gridTemplateRows = '1fr';
+                wrapper.classList.remove('opacity-0');
+                wrapper.classList.add('opacity-100');
+                icon.style.transform = 'rotate(180deg)';
+                textSpan.innerHTML = i18nData[currentLang]['btn_hide_reviews'];
+            } else {
+                wrapper.style.gridTemplateRows = '0fr';
+                wrapper.classList.remove('opacity-100');
+                wrapper.classList.add('opacity-0');
+                icon.style.transform = 'rotate(0deg)';
+                textSpan.innerHTML = i18nData[currentLang]['btn_show_reviews'];
+            }
+        }
+
+        function openModal(type) {
+            const modal = document.getElementById('legal-modal');
+            const titleEl = document.getElementById('legal-modal-title');
+            const bodyEl = document.getElementById('legal-modal-body');
+            titleEl.innerHTML = type === 'tos' ? i18nData[currentLang]['modal_tos_title'] : i18nData[currentLang]['modal_priv_title'];
+            bodyEl.innerHTML = type === 'tos' ? i18nData[currentLang]['modal_tos_content'] : i18nData[currentLang]['modal_priv_content'];
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('legal-modal').classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>
